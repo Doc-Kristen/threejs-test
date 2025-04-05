@@ -46,7 +46,7 @@ export default defineConfig({
     })
   ],
   server: {
-    open: './sitemap.html'
+    open: './index.html'
   },
   vite: {
     css: {
