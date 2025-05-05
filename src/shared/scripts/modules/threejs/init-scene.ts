@@ -1,34 +1,61 @@
 import * as THREE from 'three'
 
 export const initScene = () => {
-  const width = window.innerWidth
-  const height = window.innerHeight
+  const canvas = document.querySelector('#c')
+  const renderer = new THREE.WebGLRenderer({ canvas })
 
-  // init
-
-  const camera = new THREE.PerspectiveCamera(70, width / height, 0.01, 10)
-  camera.position.z = 1
+  const fov = 75
+  const aspect = 2
+  const near = 0.1
+  const far = 5
+  const camera = new THREE.PerspectiveCamera(fov, aspect, near, far)
+  camera.position.z = 2
 
   const scene = new THREE.Scene()
 
-  const geometry = new THREE.BoxGeometry(0.2, 0.2, 0.2)
-  const material = new THREE.MeshNormalMaterial()
+  {
+    const color = 0xffffff
+    const intensity = 1
+    const light = new THREE.DirectionalLight(color, intensity)
+    light.position.set(-1, 2, 4)
+    scene.add(light)
+  }
 
-  const mesh = new THREE.Mesh(geometry, material)
-  scene.add(mesh)
+  const boxWidth = 1
+  const boxHeight = 1
+  const boxDepth = 1
+  const newGeometry = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth)
 
-  const renderer = new THREE.WebGLRenderer({ antialias: true })
-  renderer.setSize(width, height)
-  renderer.setAnimationLoop(animate)
-  document.body.appendChild(renderer.domElement)
+  function makeInstance(geometry, color, x) {
+    const material = new THREE.MeshPhongMaterial({ color })
 
-  // animation
+    const cube = new THREE.Mesh(geometry, material)
+    scene.add(cube)
 
-  function animate(time) {
-    mesh.rotation.x = time / 2000
-    mesh.rotation.y = time / 1000
+    cube.position.x = x
+
+    return cube
+  }
+
+  const cubes = [
+    makeInstance(newGeometry, 0x44aa88, 0),
+    makeInstance(newGeometry, 0x8844aa, -2),
+    makeInstance(newGeometry, 0xaa8844, 2)
+  ]
+
+  const render = (time) => {
+    time *= 0.001
+
+    cubes.forEach((cube, ndx) => {
+      const speed = 1 + ndx * 0.1
+      const rot = time * speed
+      cube.rotation.x = rot
+      cube.rotation.y = rot
+    })
 
     renderer.render(scene, camera)
-  }
-}
 
+    requestAnimationFrame(render)
+  }
+  requestAnimationFrame(render)
+}
